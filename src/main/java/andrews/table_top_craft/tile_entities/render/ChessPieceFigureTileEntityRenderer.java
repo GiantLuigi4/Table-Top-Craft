@@ -5,7 +5,6 @@ import andrews.table_top_craft.objects.blocks.ChessPieceFigureBlock;
 import andrews.table_top_craft.tile_entities.ChessPieceFigureBlockEntity;
 import andrews.table_top_craft.tile_entities.model.piece_figure.ChessPieceFigureStandModel;
 import andrews.table_top_craft.util.*;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -19,28 +18,15 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ChessPieceFigureTileEntityRenderer implements BlockEntityRenderer<ChessPieceFigureBlockEntity>
 {
-    // Dynamic Texture
-    private static final NativeImage image = new NativeImage(NativeImage.Format.RGBA, 1, 1, true);
-    private static final DynamicTexture texture = new DynamicTexture(image);
-    private static ResourceLocation resourceLocation = null;
     // Chess Piece Stand texture and model
     public static final ResourceLocation CHESS_PIECE_FIGURE_TEXTURE = new ResourceLocation(Reference.MODID, "textures/tile/chess_piece_figure/chess_piece_figure.png");
     private static ChessPieceFigureStandModel chessPieceFigureStandModel;
     private Color color = new Color(0, 0, 0);
-
-    static
-    {
-        // We create the dummy texture
-        image.setPixelRGBA(0, 0, 16777215);
-        texture.upload();
-        resourceLocation = Minecraft.getInstance().getTextureManager().register("table_top_craft_dummy", texture);
-    }
 
     public ChessPieceFigureTileEntityRenderer(BlockEntityRendererProvider.Context context)
     {
@@ -114,7 +100,7 @@ public class ChessPieceFigureTileEntityRenderer implements BlockEntityRenderer<C
         }
 
         poseStack.pushPose();
-        RenderType type = TTCRenderTypes.getChessPieceSolid(resourceLocation);
+        RenderType type = BufferHelpers.getRenderType();
         type.setupRenderState();
         ShaderInstance shaderinstance = RenderSystem.getShader();
         if (shaderinstance.PROJECTION_MATRIX != null)
@@ -151,14 +137,15 @@ public class ChessPieceFigureTileEntityRenderer implements BlockEntityRenderer<C
             {
                 shaderinstance.MODEL_VIEW_MATRIX.set(poseStack.last().pose());
             }
+            shaderinstance.MODEL_VIEW_MATRIX.upload();
         }
         
         BasePiece.PieceModelSet set = BasePiece.PieceModelSet.get(blockEntity.getPieceSet());
         BasePiece.PieceType piece = BasePiece.PieceType.get(blockEntity.getPieceType());
-        VertexBuffer pawnBuffer = DrawScreenHelper.getBuffer(set, piece);
+        VertexBuffer pawnBuffer = BufferGenerator.getBuffer(set, piece);
         
         /* setup render state */
-        TTCRenderTypes.getChessPieceSolid(resourceLocation).setupRenderState();
+        BufferHelpers.getRenderType().setupRenderState();
 //        shaderinstance.apply();
         BufferHelpers.draw(pawnBuffer);
         /* clear render state */

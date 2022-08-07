@@ -109,7 +109,7 @@ public class TableTopCraft
 	{
 		try
 		{
-			event.registerShader(new ShaderInstance(event.getResourceManager(), new ResourceLocation(Reference.MODID,"rendertype_solid"), DefaultVertexFormat.BLOCK), (shader) -> {
+			event.registerShader(new ShaderInstance(event.getResourceManager(), new ResourceLocation(Reference.MODID,"rendertype_solid"), DefaultVertexFormat.NEW_ENTITY), (shader) -> {
 				rendertypeSolidBlockEntityShader = shader;
 			});
 		}

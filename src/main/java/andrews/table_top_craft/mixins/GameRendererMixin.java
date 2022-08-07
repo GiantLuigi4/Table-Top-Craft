@@ -1,7 +1,7 @@
 package andrews.table_top_craft.mixins;
 
 import andrews.table_top_craft.tile_entities.render.BufferHelpers;
-import andrews.table_top_craft.util.DrawScreenHelper;
+import andrews.table_top_craft.util.BufferGenerator;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ public class GameRendererMixin
 	@Inject(at = @At("TAIL"), method = "onResourceManagerReload")
 	public void postLoadShaders(ResourceManager pResourceManager, CallbackInfo ci)
 	{
-		DrawScreenHelper.setup();
+		BufferGenerator.setup();
 	}
 	
 	@Inject(at = @At("HEAD"), method = "render")

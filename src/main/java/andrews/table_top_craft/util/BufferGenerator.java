@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 
-public class DrawScreenHelper
+public class BufferGenerator
 {
 	// The texture path is just a dummy texture used as a placeholder
 	public static final VertexFormat chessVertexFormat = TTCRenderTypes.getChessPieceSolid(new ResourceLocation(Reference.MODID, "textures/tile/chess/pieces.png")).format();

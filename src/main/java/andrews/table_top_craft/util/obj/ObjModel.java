@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import org.apache.commons.compress.utils.IOUtils;
@@ -64,6 +65,7 @@ public class ObjModel
     	pos(builder, stack.last().pose(), x, y, z)
     	.color(1F, 1F, 1F, 1F)
     	.uv(u, v)
+        .overlayCoords(OverlayTexture.NO_OVERLAY) // luigi switched it back to the entity vertex format, for com
 //        .overlayCoords(0, 0) // We use the DefaultVertexFormat.BLOCK so there is no need for an overlay
     	.uv2(15, 15); // These values are full brightness
     	normal(builder, stack.last().normal(), nx, ny, nz)

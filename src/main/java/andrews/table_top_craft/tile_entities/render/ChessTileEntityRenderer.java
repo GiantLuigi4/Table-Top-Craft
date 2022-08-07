@@ -1,6 +1,6 @@
 package andrews.table_top_craft.tile_entities.render;
 
-import andrews.table_top_craft.util.DrawScreenHelper;
+import andrews.table_top_craft.util.BufferGenerator;
 import andrews.table_top_craft.game_logic.chess.PieceColor;
 import andrews.table_top_craft.game_logic.chess.board.Board;
 import andrews.table_top_craft.game_logic.chess.board.BoardUtils;
@@ -21,7 +21,6 @@ import andrews.table_top_craft.util.Reference;
 import andrews.table_top_craft.util.TTCRenderTypes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Ints;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -35,7 +34,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,11 +53,6 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 	private static final float CHESS_SCALE = 0.125F;
 	private final float CHESS_PIECE_SCALE = 0.1F;
 	
-	// Dynamic Texture
-	private static final NativeImage image = new NativeImage(NativeImage.Format.RGBA, 1, 1, true);
-	private static final DynamicTexture texture = new DynamicTexture(image);
-	private static ResourceLocation resourceLocation = null;
-	
 	// Chess Models
 	private final ChessHighlightModel highlightModel;
 	private final ChessTilesInfoModel tilesInfoModel;
@@ -69,13 +62,6 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 	private final List<Integer> destinationCoordinates = new ArrayList<>();
 	private final List<BasePiece> whiteTakenPieces = new ArrayList<>();
 	private final List<BasePiece> blackTakenPieces = new ArrayList<>();
-
-	static
-	{
-		image.setPixelRGBA(0, 0, 16777215);
-		texture.upload();
-		resourceLocation = Minecraft.getInstance().getTextureManager().register("table_top_craft_dummy", texture);
-	}
 
 	public ChessTileEntityRenderer(BlockEntityRendererProvider.Context context)
 	{
@@ -169,7 +155,7 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 			float bB = NBTColorSaving.getBlue(tileEntityIn.getBlackPiecesColor()) / 255F;
 			
 			/* setup render state */
-			RenderType type = TTCRenderTypes.getChessPieceSolid(resourceLocation);
+			RenderType type = BufferHelpers.getRenderType();
 			type.setupRenderState();
 			ShaderInstance shaderinstance = RenderSystem.getShader();
 			if (shaderinstance.PROJECTION_MATRIX != null) shaderinstance.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
@@ -413,10 +399,13 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 		ShaderInstance shaderinstance = RenderSystem.getShader();
 		BufferHelpers.updateColor(shaderinstance, new float[]{pieceColor.isWhite() ? wR : bR, pieceColor.isWhite() ? wG : bG, pieceColor.isWhite() ? wB : bB, 1f});
 		poseStack.pushPose();
-		if (shaderinstance.MODEL_VIEW_MATRIX != null) shaderinstance.MODEL_VIEW_MATRIX.set(poseStack.last().pose());
+		if (shaderinstance.MODEL_VIEW_MATRIX != null) {
+			shaderinstance.MODEL_VIEW_MATRIX.set(poseStack.last().pose());
+			shaderinstance.MODEL_VIEW_MATRIX.upload();
+		}
 		
 		BasePiece.PieceModelSet set = BasePiece.PieceModelSet.get(pieceModelSet + 1);
-		VertexBuffer pawnBuffer = DrawScreenHelper.getBuffer(set, pieceType);
+		VertexBuffer pawnBuffer = BufferGenerator.getBuffer(set, pieceType);
 		BufferHelpers.draw(pawnBuffer);
 		
 		poseStack.popPose();
