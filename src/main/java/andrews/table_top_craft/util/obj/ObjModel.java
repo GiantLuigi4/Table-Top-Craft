@@ -18,12 +18,12 @@ import java.util.ArrayList;
 
 public class ObjModel
 {
-    private final Vector3f[] v;
-    private final Vec2[] vt;
-    private final Vector3f[] vn;
-    private final Face[] faces;
+    public final Vector3f[] v;
+    public final Vec2[] vt;
+    public final Vector3f[] vn;
+    public final Face[] faces;
     
-    private ObjModel(Vector3f[] v, Vec2[] vt, Vector3f[] vn, Face[] faces)
+    public ObjModel(Vector3f[] v, Vec2[] vt, Vector3f[] vn, Face[] faces)
     {
         this.v = v;
         this.vt = vt;
@@ -31,7 +31,7 @@ public class ObjModel
         this.faces = faces;
     }
     
-    public void render(PoseStack stack, VertexConsumer buffer)
+    public void render(PoseStack stack, VertexConsumer buffer, boolean quads)
     {    	
         try
         {
@@ -52,6 +52,9 @@ public class ObjModel
                 addVertex(stack, buffer, v1.x(), v1.y(), v1.z(), vt1.x, -vt1.y, vn1.x(), vn1.y(), vn1.z());
                 addVertex(stack, buffer, v2.x(), v2.y(), v2.z(), vt2.x, -vt2.y, vn2.x(), vn2.y(), vn2.z());
                 addVertex(stack, buffer, v3.x(), v3.y(), v3.z(), vt3.x, -vt3.y, vn3.x(), vn3.y(), vn3.z());
+                if (quads) {
+                    addVertex(stack, buffer, v3.x(), v3.y(), v3.z(), vt3.x, -vt3.y, vn3.x(), vn3.y(), vn3.z());
+                }
             }
         }
         catch(Exception e)
@@ -161,7 +164,7 @@ public class ObjModel
         return null;
     }
     
-    private static class Face
+    protected static class Face
     {
         // Vertex
         public int v1;

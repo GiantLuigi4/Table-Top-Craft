@@ -19,6 +19,7 @@ import andrews.table_top_craft.tile_entities.model.chess.ChessTilesInfoModel;
 import andrews.table_top_craft.util.NBTColorSaving;
 import andrews.table_top_craft.util.Reference;
 import andrews.table_top_craft.util.TTCRenderTypes;
+import andrews.table_top_craft.util.lod.LODLevel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Ints;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -36,6 +37,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import org.lwjgl.opengl.GL11;
 
@@ -73,6 +75,18 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 	@Override
 	public void render(ChessTileEntity tileEntityIn, float partialTicks, PoseStack poseStack, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn)
 	{
+		double dst = tileEntityIn.getBlockPos().distToCenterSqr(
+				Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition().x,
+				Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition().y,
+				Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition().z
+		);
+		dst = dst * (Minecraft.getInstance().options.fov().get() / (Math.PI * 180));
+		dst /= 30;
+		BufferGenerator.level(LODLevel.values()[Mth.clamp((int)dst, 0, LODLevel.values().length - 1)]);
+		
+		// We reset the shader color to avoid funny business during the next render call
+		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+		
 		Board board;
 		Direction facing = Direction.NORTH;
 	    if(tileEntityIn.hasLevel())
@@ -208,7 +222,7 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 						}
 						
 						// Renders The Chess Piece
-						renderPiece(poseStack, tileEntityIn.getPieceSet(), pieceType, pieceColor, wR, wG, wB, bR, bG, bB);
+						renderPiece(poseStack, tileEntityIn.getPieceSet(), pieceType, pieceColor, wR, wG, wB, bR, bG, bB, bufferIn);
 						
 						poseStack.popPose(); // # Move Piece to Board surface and victory dance #
 						poseStack.popPose(); // # X and Z Position on Chess Board #
@@ -223,7 +237,7 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 			// Renders the taken pieces in the piece storage bellow the chess plate
 			// Moves the pieces down into the taken Pieces area
 			poseStack.translate(CHESS_SCALE * -6.5D, 0.556D, CHESS_SCALE * 0.3D);
-			renderTakenPieces(poseStack, tileEntityIn.getMoveLog(), tileEntityIn);
+			renderTakenPieces(poseStack, tileEntityIn.getMoveLog(), tileEntityIn, bufferIn);
 			/* clear render state */
 			VertexBuffer.unbind();
 			shaderinstance.clear();
@@ -315,7 +329,7 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 		}
 	}
 	
-	private void renderTakenPieces(PoseStack stack, ChessMoveLog moveLog, ChessTileEntity chessTileEntity)
+	private void renderTakenPieces(PoseStack stack, ChessMoveLog moveLog, ChessTileEntity chessTileEntity, MultiBufferSource bufferIn)
 	{
 		for(final BaseMove move : moveLog.getMoves())
 		{
@@ -345,8 +359,8 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 		blackTakenPieces.sort((piece1, piece2) -> Ints.compare(piece2.getPieceValue(), piece1.getPieceValue()));
 		
 		// draw
-		renderTakenPiecesFigures(stack, chessTileEntity, whiteTakenPieces, true);
-		renderTakenPiecesFigures(stack, chessTileEntity, blackTakenPieces, false);
+		renderTakenPiecesFigures(stack, chessTileEntity, whiteTakenPieces, true, bufferIn);
+		renderTakenPiecesFigures(stack, chessTileEntity, blackTakenPieces, false, bufferIn);
 		
 		// We have to clear the lists, otherwise we end up with the endless army of endlessness
 		/* GiantLuigi4: lol */
@@ -354,7 +368,7 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 		blackTakenPieces.clear();
 	}
 	
-	private void renderTakenPiecesFigures(PoseStack stack, ChessTileEntity chessTileEntity, final List<BasePiece> pieceList, final boolean isWhite)
+	private void renderTakenPiecesFigures(PoseStack stack, ChessTileEntity chessTileEntity, final List<BasePiece> pieceList, final boolean isWhite, MultiBufferSource bufferIn)
 	{
 		int currentCoordinate = -1;
 		int currentRank = 0;
@@ -387,13 +401,13 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 				stack.translate((CHESS_SCALE * 0.855D) * 7D, 0.0D, 0.8D);
 			stack.translate((CHESS_SCALE * 0.855D) * -currentCoordinate, 0.0D, CHESS_SCALE * -currentRank);
 			
-			renderPiece(stack, chessTileEntity.getPieceSet(), piece.getPieceType(), piece.getPieceColor(), wR, wG, wB, bR, bG, bB);
+			renderPiece(stack, chessTileEntity.getPieceSet(), piece.getPieceType(), piece.getPieceColor(), wR, wG, wB, bR, bG, bB, bufferIn);
 			
 			stack.popPose();
 		}
 	}
 	
-	private void renderPiece(PoseStack poseStack, int pieceModelSet, PieceType pieceType, PieceColor pieceColor, float wR, float wG, float wB, float bR, float bG, float bB)
+	private void renderPiece(PoseStack poseStack, int pieceModelSet, PieceType pieceType, PieceColor pieceColor, float wR, float wG, float wB, float bR, float bG, float bB, MultiBufferSource bufferIn)
 	{
 		// The RenderType for the chess pieces (the texture is just a dummy texture)
 		ShaderInstance shaderinstance = RenderSystem.getShader();
@@ -405,12 +419,15 @@ public class ChessTileEntityRenderer implements BlockEntityRenderer<ChessTileEnt
 		}
 		
 		BasePiece.PieceModelSet set = BasePiece.PieceModelSet.get(pieceModelSet + 1);
-		VertexBuffer pawnBuffer = BufferGenerator.getBuffer(set, pieceType);
-		BufferHelpers.draw(pawnBuffer);
+		if (BufferHelpers.useVanillaShader) {
+			VertexConsumer consumer = bufferIn.getBuffer(BufferHelpers.getRenderType());
+			BufferGenerator.CHESS_PIECE_MODEL.render(poseStack, consumer, LODLevel.MAX /* TODO */, pieceType, set, true);
+		} else {
+			VertexBuffer pawnBuffer = BufferGenerator.getBuffer(set, pieceType);
+			BufferHelpers.draw(pawnBuffer);
+		}
 		
 		poseStack.popPose();
-		// We reset the shader color to avoid funny business during the next render call
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 	
 	/**

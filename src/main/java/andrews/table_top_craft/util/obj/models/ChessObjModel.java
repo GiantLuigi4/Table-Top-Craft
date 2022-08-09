@@ -3,6 +3,8 @@ package andrews.table_top_craft.util.obj.models;
 import andrews.table_top_craft.game_logic.chess.pieces.BasePiece.PieceModelSet;
 import andrews.table_top_craft.game_logic.chess.pieces.BasePiece.PieceType;
 import andrews.table_top_craft.util.Reference;
+import andrews.table_top_craft.util.lod.LODLevel;
+import andrews.table_top_craft.util.lod.LODMesh;
 import andrews.table_top_craft.util.obj.ObjModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -16,7 +18,7 @@ import java.util.HashMap;
 @OnlyIn(Dist.CLIENT)
 public class ChessObjModel
 {
-	private final HashMap<Pair<PieceModelSet, PieceType>, ObjModel> MODELS = new HashMap<>();
+	private final HashMap<Pair<PieceModelSet, PieceType>, LODMesh> MODELS = new HashMap<>();
 	
 	public ChessObjModel()
 	{
@@ -24,7 +26,7 @@ public class ChessObjModel
 		{
 			for (PieceType pieceType : PieceType.values())
 			{
-				MODELS.put(Pair.of(value, pieceType), ObjModel.loadModel(new ResourceLocation(Reference.MODID, value.pathFor(pieceType))));
+				MODELS.put(Pair.of(value, pieceType), LODMesh.of(ObjModel.loadModel(new ResourceLocation(Reference.MODID, value.pathFor(pieceType)))));
 			}
 		}
 	}
@@ -34,14 +36,15 @@ public class ChessObjModel
 	 * @param stack The MatrixStack
 	 * @param buffer The IRenderTypeBuffer
 	 * @param pieceType The Chess Piece Type
+	 * @param quads if the last vertex should be duplicated to make a quad
 	 */
-	public void render(PoseStack stack, VertexConsumer buffer, PieceType pieceType, PieceModelSet pieceModelSet)
+	public void render(PoseStack stack, VertexConsumer buffer, LODLevel level, PieceType pieceType, PieceModelSet pieceModelSet, boolean quads)
 	{	
 		stack.pushPose();
 		// We scale the Piece and invert the rendering
 		stack.scale(1F, -1F, -1F);
 		stack.scale(0.1F, 0.1F, 0.1F);
-		MODELS.get(Pair.of(pieceModelSet, pieceType)).render(stack, buffer);
+		MODELS.get(Pair.of(pieceModelSet, pieceType)).render(stack, buffer, quads, level);
 		stack.popPose();
 	}
 }
