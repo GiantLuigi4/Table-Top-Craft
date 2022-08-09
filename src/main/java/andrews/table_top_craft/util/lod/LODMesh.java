@@ -134,9 +134,8 @@ public class LODMesh extends ObjModel {
 		return new LODMesh(loadModel.v, loadModel.vt, loadModel.vn, loadModel.faces);
 	}
 	
-	public void render(PoseStack stack, VertexConsumer buffer, boolean quads, LODLevel level) {
-//		if (level == LODLevel.MAX) super.render(stack, buffer, quads);
-//		else modelsLOD.get(level).render(stack, buffer, quads);
-		modelsLOD.get(level).render(stack, buffer, quads);
+	public void render(PoseStack stack, VertexConsumer buffer, boolean quads, LODLevel level, float red, float green, float blue, float alpha, int lu, int lv) {
+		if (level == LODLevel.MAX) super.render(stack, buffer, quads, red, green, blue, alpha, lu, lv);
+		else modelsLOD.get(level).render(stack, buffer, quads, red, green, blue, alpha, lu, lv);
 	}
 }

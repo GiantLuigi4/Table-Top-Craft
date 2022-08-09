@@ -39,12 +39,17 @@ public class ChessObjModel
 	 * @param quads if the last vertex should be duplicated to make a quad
 	 */
 	public void render(PoseStack stack, VertexConsumer buffer, LODLevel level, PieceType pieceType, PieceModelSet pieceModelSet, boolean quads)
-	{	
+	{
+		render(stack, buffer, level, pieceType, pieceModelSet, quads, 1, 1, 1, 1, 15, 15);
+	}
+	
+	public void render(PoseStack stack, VertexConsumer buffer, LODLevel level, PieceType pieceType, PieceModelSet pieceModelSet, boolean quads, float red, float green, float blue, float alpha, int lu, int lv)
+	{
 		stack.pushPose();
 		// We scale the Piece and invert the rendering
 		stack.scale(1F, -1F, -1F);
 		stack.scale(0.1F, 0.1F, 0.1F);
-		MODELS.get(Pair.of(pieceModelSet, pieceType)).render(stack, buffer, quads, level);
+		MODELS.get(Pair.of(pieceModelSet, pieceType)).render(stack, buffer, quads, level, red, green, blue, alpha, lu, lv);
 		stack.popPose();
 	}
 }

@@ -1,6 +1,8 @@
 package andrews.table_top_craft.tile_entities.render;
 
+import andrews.table_top_craft.util.Color;
 import andrews.table_top_craft.util.TTCRenderTypes;
+import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.Uniform;
@@ -8,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -19,11 +22,11 @@ public class BufferHelpers {
 	
 	public static boolean useVanillaShader = false;
 	
-	private static int currentU;
-	private static int currentV;
+	public static int currentU;
+	public static int currentV;
 	
 	public static void setupRender(ShaderInstance pShaderInstance, int lightU, int ilghtV /* GiantLuigi4 (Jason): no I will not correct this typo */) {
-		useVanillaShader = false;
+		useVanillaShader = true;
 		
 		pShaderInstance.apply();
 		
@@ -127,39 +130,39 @@ public class BufferHelpers {
 	}
 	
 	public static void updateColor(ShaderInstance pShaderInstance, float[] floats) {
-//		if (useVanillaShader) {
-//			LightTexture ltexture = Minecraft.getInstance().gameRenderer.lightTexture();
-//			int RGBA = ltexture.lightPixels.getPixelRGBA(currentU, currentV);
-//
-//			// TODO: figure out blending here
-//			if (pShaderInstance.COLOR_MODULATOR != null) {
-//				Color lColor = new Color(RGBA);
-//				pShaderInstance.COLOR_MODULATOR.set(new float[]{
-//						lColor.getRed() / 255f,
-//						lColor.getGreen() / 255f,
-//						lColor.getBlue() / 255f,
-//						lColor.getAlpha() / 255f
-//				});
-//				pShaderInstance.COLOR_MODULATOR.upload();
-//			}
-//
-//			image.setPixelRGBA(
-//					0,
-//					0,
-//					new Color(
-//							(int) (floats[0] * 255),
-//							(int) (floats[1] * 255),
-//							(int) (floats[2] * 255),
-//							(int) (floats[3] * 255)
-//					).getRGB()
-//			);
-//			texture.upload();
-//		} else {
-		if (pShaderInstance.COLOR_MODULATOR != null) {
-			pShaderInstance.COLOR_MODULATOR.set(floats);
-			pShaderInstance.COLOR_MODULATOR.upload();
+		if (useVanillaShader) {
+			LightTexture ltexture = Minecraft.getInstance().gameRenderer.lightTexture();
+			int RGBA = ltexture.lightPixels.getPixelRGBA(currentU, currentV);
+
+			// TODO: figure out blending here
+			if (pShaderInstance.COLOR_MODULATOR != null) {
+				Color lColor = new Color(RGBA);
+				pShaderInstance.COLOR_MODULATOR.set(new float[]{
+						lColor.getRed() / 255f,
+						lColor.getGreen() / 255f,
+						lColor.getBlue() / 255f,
+						lColor.getAlpha() / 255f
+				});
+				pShaderInstance.COLOR_MODULATOR.upload();
+			}
+
+			image.setPixelRGBA(
+					0,
+					0,
+					new Color(
+							(int) (floats[0] * 255),
+							(int) (floats[1] * 255),
+							(int) (floats[2] * 255),
+							(int) (floats[3] * 255)
+					).getRGB()
+			);
+			texture.upload();
+		} else {
+			if (pShaderInstance.COLOR_MODULATOR != null) {
+				pShaderInstance.COLOR_MODULATOR.set(floats);
+				pShaderInstance.COLOR_MODULATOR.upload();
+			}
 		}
-//		}
 	}
 	
 	public static void draw(VertexBuffer buffer) {

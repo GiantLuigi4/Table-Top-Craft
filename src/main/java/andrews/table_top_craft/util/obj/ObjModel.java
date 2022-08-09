@@ -31,8 +31,8 @@ public class ObjModel
         this.faces = faces;
     }
     
-    public void render(PoseStack stack, VertexConsumer buffer, boolean quads)
-    {    	
+    public void render(PoseStack stack, VertexConsumer buffer, boolean quads, float red, float green, float blue, float alpha, int lu, int lv)
+    {
         try
         {
             for(Face face : faces)
@@ -49,11 +49,11 @@ public class ObjModel
                 Vector3f vn2 = vn[face.vn2 - 1];
                 Vector3f vn3 = vn[face.vn3 - 1];
 
-                addVertex(stack, buffer, v1.x(), v1.y(), v1.z(), vt1.x, -vt1.y, vn1.x(), vn1.y(), vn1.z());
-                addVertex(stack, buffer, v2.x(), v2.y(), v2.z(), vt2.x, -vt2.y, vn2.x(), vn2.y(), vn2.z());
-                addVertex(stack, buffer, v3.x(), v3.y(), v3.z(), vt3.x, -vt3.y, vn3.x(), vn3.y(), vn3.z());
+                addVertex(stack, buffer, v1.x(), v1.y(), v1.z(), vt1.x, -vt1.y, vn1.x(), vn1.y(), vn1.z(), red, blue, green, alpha, lu, lv);
+                addVertex(stack, buffer, v2.x(), v2.y(), v2.z(), vt2.x, -vt2.y, vn2.x(), vn2.y(), vn2.z(), red, blue, green, alpha, lu, lv);
+                addVertex(stack, buffer, v3.x(), v3.y(), v3.z(), vt3.x, -vt3.y, vn3.x(), vn3.y(), vn3.z(), red, blue, green, alpha, lu, lv);
                 if (quads) {
-                    addVertex(stack, buffer, v3.x(), v3.y(), v3.z(), vt3.x, -vt3.y, vn3.x(), vn3.y(), vn3.z());
+                    addVertex(stack, buffer, v3.x(), v3.y(), v3.z(), vt3.x, -vt3.y, vn3.x(), vn3.y(), vn3.z(), red, blue, green, alpha, lu, lv);
                 }
             }
         }
@@ -63,14 +63,14 @@ public class ObjModel
         }
     }
     
-    private void addVertex(PoseStack stack, VertexConsumer builder, float x, float y, float z, float u, float v, float nx, float ny, float nz)
+    private void addVertex(PoseStack stack, VertexConsumer builder, float x, float y, float z, float u, float v, float nx, float ny, float nz, float red, float green, float blue, float alpha, int lu, int lv)
     {
     	pos(builder, stack.last().pose(), x, y, z)
-    	.color(1F, 1F, 1F, 1F)
+    	.color(red, green, blue, alpha)
     	.uv(u, v)
         .overlayCoords(OverlayTexture.NO_OVERLAY) // luigi switched it back to the entity vertex format, for com
 //        .overlayCoords(0, 0) // We use the DefaultVertexFormat.BLOCK so there is no need for an overlay
-    	.uv2(15, 15); // These values are full brightness
+    	.uv2(lu, lv);
     	normal(builder, stack.last().normal(), nx, ny, nz)
     	.endVertex();
     }
