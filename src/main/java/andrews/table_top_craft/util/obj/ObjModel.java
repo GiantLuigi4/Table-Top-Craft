@@ -3,13 +3,19 @@ package andrews.table_top_craft.util.obj;
 import andrews.table_top_craft.util.Reference;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+<<<<<<< HEAD
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+=======
+>>>>>>> origin/master
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import org.apache.commons.compress.utils.IOUtils;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,8 +36,13 @@ public class ObjModel
         this.vn = vn;
         this.faces = faces;
     }
+<<<<<<< HEAD
     
     public void render(PoseStack stack, VertexConsumer buffer, boolean quads, float red, float green, float blue, float alpha, int lu, int lv)
+=======
+
+    public void render(PoseStack stack, VertexConsumer buffer)
+>>>>>>> origin/master
     {
         try
         {
@@ -62,9 +73,40 @@ public class ObjModel
             e.printStackTrace();
         }
     }
+
+    public void render(PoseStack stack, VertexConsumer buffer, float red, float green, float blue, int packedLight)
+    {    	
+        try
+        {
+            for(Face face : faces)
+            {
+                Vector3f v1 = v[face.v1 - 1];
+                Vector3f v2 = v[face.v2 - 1];
+                Vector3f v3 = v[face.v3 - 1];
+
+                Vec2 vt1 = vt[face.vt1 - 1];
+                Vec2 vt2 = vt[face.vt2 - 1];
+                Vec2 vt3 = vt[face.vt3 - 1];
+
+                Vector3f vn1 = vn[face.vn1 - 1];
+                Vector3f vn2 = vn[face.vn2 - 1];
+                Vector3f vn3 = vn[face.vn3 - 1];
+
+                buffer.vertex(stack.last().pose(), v1.x(), v1.y(), v1.z()).color(red, green, blue, 1F).uv(vt1.x, -vt1.y).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(stack.last().normal(), vn1.x(), vn1.y(), vn1.z()).endVertex();
+                buffer.vertex(stack.last().pose(), v2.x(), v2.y(), v2.z()).color(red, green, blue, 1F).uv(vt2.x, -vt2.y).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(stack.last().normal(), vn2.x(), vn2.y(), vn2.z()).endVertex();
+                buffer.vertex(stack.last().pose(), v3.x(), v3.y(), v3.z()).color(red, green, blue, 1F).uv(vt3.x, -vt3.y).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(stack.last().normal(), vn3.x(), vn3.y(), vn3.z()).endVertex();
+                buffer.vertex(stack.last().pose(), v3.x(), v3.y(), v3.z()).color(red, green, blue, 1F).uv(vt3.x, -vt3.y).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(stack.last().normal(), vn3.x(), vn3.y(), vn3.z()).endVertex();
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
     
     private void addVertex(PoseStack stack, VertexConsumer builder, float x, float y, float z, float u, float v, float nx, float ny, float nz, float red, float green, float blue, float alpha, int lu, int lv)
     {
+<<<<<<< HEAD
     	pos(builder, stack.last().pose(), x, y, z)
     	.color(red, green, blue, alpha)
     	.uv(u, v)
@@ -73,17 +115,26 @@ public class ObjModel
     	.uv2(lu, lv);
     	normal(builder, stack.last().normal(), nx, ny, nz)
     	.endVertex();
+=======
+        pos(builder, stack.last().pose(), x, y, z)
+                .color(1F, 1F, 1F, 1F)
+                .uv(u, v)
+//        .overlayCoords(0, 0) // We use the DefaultVertexFormat.BLOCK so there is no need for an overlay
+                .uv2(15, 15); // These values are full brightness
+        normal(builder, stack.last().normal(), nx, ny, nz)
+                .endVertex();
+>>>>>>> origin/master
     }
-    
+
 	private static VertexConsumer pos(VertexConsumer bufferBuilder, Matrix4f matrix4f, float x, float y, float z)
 	{
 		// Calling 'bufferBuilder.pos(matrix4f, x, y, z)' allocates a Vector4f
 		// To avoid allocating so many short-lived vectors we do the transform ourselves instead
 		float w = 1.0F;
-		float tx = matrix4f.m00 * x + matrix4f.m01 * y + matrix4f.m02 * z + matrix4f.m03 * w;
-		float ty = matrix4f.m10 * x + matrix4f.m11 * y + matrix4f.m12 * z + matrix4f.m13 * w;
-		float tz = matrix4f.m20 * x + matrix4f.m21 * y + matrix4f.m22 * z + matrix4f.m23 * w;
-		
+		float tx = matrix4f.m00() * x + matrix4f.m01() * y + matrix4f.m02() * z + matrix4f.m03() * w;
+		float ty = matrix4f.m10() * x + matrix4f.m11() * y + matrix4f.m12() * z + matrix4f.m13() * w;
+		float tz = matrix4f.m20() * x + matrix4f.m21() * y + matrix4f.m22() * z + matrix4f.m23() * w;
+
 		return bufferBuilder.vertex(tx, ty, tz);
 	}
 	
@@ -94,7 +145,7 @@ public class ObjModel
 	    float nx = matrix3f.m00 * x + matrix3f.m01 * y + matrix3f.m02 * z;
 	    float ny = matrix3f.m10 * x + matrix3f.m11 * y + matrix3f.m12 * z;
 	    float nz = matrix3f.m20 * x + matrix3f.m21 * y + matrix3f.m22 * z;
-	      
+
 	    return bufferBuilder.normal(nx, ny, nz);
 	}
     

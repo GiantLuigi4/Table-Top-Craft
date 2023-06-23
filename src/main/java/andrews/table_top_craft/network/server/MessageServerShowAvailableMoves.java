@@ -1,8 +1,6 @@
 package andrews.table_top_craft.network.server;
 
-import java.util.function.Supplier;
-
-import andrews.table_top_craft.tile_entities.ChessTileEntity;
+import andrews.table_top_craft.block_entities.ChessBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -10,6 +8,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
 
 public class MessageServerShowAvailableMoves
 {
@@ -45,10 +45,10 @@ public class MessageServerShowAvailableMoves
 				if(level != null)
 				{
 					BlockEntity blockEntity = level.getBlockEntity(chessPos);
-					// We make sure the TileEntity is a ChessTileEntity
-					if(blockEntity instanceof ChessTileEntity chessTileEntity)
+					// We make sure the TileEntity is a ChessBlockEntity
+					if(blockEntity instanceof ChessBlockEntity chessBlockEntity)
 			        {
-						chessTileEntity.setShowAvailableMoves(!chessTileEntity.getShowAvailableMoves());
+						chessBlockEntity.setShowAvailableMoves(!chessBlockEntity.getShowAvailableMoves());
 						level.sendBlockUpdated(message.pos, level.getBlockState(chessPos), level.getBlockState(chessPos), 2);
 			        }
 				}

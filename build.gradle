@@ -4,16 +4,17 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.+'
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-version = '1.19-3.0.0'
+version = '1.19.4-5.0.1'
 group = 'com.andrews.table_top_craft'
 archivesBaseName = 'table_top_craft'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'parchment', version: '1.18.2-2022.07.03-1.19'
+    mappings channel: 'parchment', version: '1.19.3-2023.03.12-1.19.4'
   
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -53,13 +54,22 @@ mixin {
 //sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
     maven { url "https://www.cursemaven.com" }
 }
 
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19-41.0.99'
-    implementation fg.deobf("curse.maven:spark-361579:3828094")
+    minecraft 'net.minecraftforge:forge:1.19.4-45.1.0'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    minecraftLibrary 'net.objecthunter:exp4j:0.4.8'
+    shade 'net.objecthunter:exp4j:0.4.8'
+
+    compileOnly fg.deobf("curse.maven:oculus-581495:4451142")
 }
 
 jar {
@@ -76,6 +86,17 @@ jar {
     }
 }
 
+shadowJar {
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+    relocate 'net.objecthunter', "andrews.table_top_craft.shadowed.objecthunter"
+    finalizedBy 'reobfShadowJar'
+}
+
+assemble.dependsOn shadowJar
+reobf {
+    shadowJar {}
+}
 jar.finalizedBy('reobfJar')
 
 tasks.withType(JavaCompile).configureEach {

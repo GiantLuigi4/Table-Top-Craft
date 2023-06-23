@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -28,13 +29,13 @@ public class ChessRandomColorButton extends Button
 
 	public ChessRandomColorButton(Screen screenIn, int xPos, int yPos)
 	{
-		super(xPos, yPos, buttonWidth, buttonHeight, Component.literal(""), (button) -> { handleButtonPress(); });
+		super(xPos, yPos, buttonWidth, buttonHeight, Component.literal(""), (button) -> { handleButtonPress(); }, DEFAULT_NARRATION);
 		this.fontRenderer = Minecraft.getInstance().font;
 		screen = screenIn;
 	}
 	
 	@Override
-	public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
+	public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
 	{
 		this.isHovered = mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height || this.isFocused();
 		
@@ -47,7 +48,7 @@ public class ChessRandomColorButton extends Button
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		poseStack.pushPose();
 		RenderSystem.enableBlend();
-		this.blit(poseStack, x, y, u, v, width, height);
+		GuiComponent.blit(poseStack, x, y, u, v, width, height);
 		RenderSystem.disableBlend();
 		poseStack.popPose();
 		boolean useText2 = screen instanceof IColorPickerExtended;

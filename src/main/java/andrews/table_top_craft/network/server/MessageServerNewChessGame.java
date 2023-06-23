@@ -1,9 +1,8 @@
 package andrews.table_top_craft.network.server;
 
-import java.util.function.Supplier;
-
 import andrews.table_top_craft.game_logic.chess.board.Board;
-import andrews.table_top_craft.tile_entities.ChessTileEntity;
+import andrews.table_top_craft.block_entities.ChessBlockEntity;
+import andrews.table_top_craft.util.NetworkUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -11,6 +10,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
 
 public class MessageServerNewChessGame
 {
@@ -46,13 +47,22 @@ public class MessageServerNewChessGame
 				if(level != null)
 				{
 					BlockEntity blockEntity = level.getBlockEntity(chessPos);
-					// We make sure the TileEntity is a ChessTileEntity
-					if(blockEntity instanceof ChessTileEntity chessTileEntity)
+					// We make sure the TileEntity is a ChessBlockEntity
+					if(blockEntity instanceof ChessBlockEntity chessBlockEntity)
 			        {
 						Board board = Board.createStandardBoard();
-						chessTileEntity.setBoard(board);
-						chessTileEntity.getMoveLog().clear();
+						chessBlockEntity.setBoard(board);
+						chessBlockEntity.getMoveLog().clear();
+						chessBlockEntity.setHumanMovedPiece(null);
+						chessBlockEntity.setSourceTile(null);
+						chessBlockEntity.setWaitingForPromotion(false);
+						chessBlockEntity.setPromotionCoordinate((byte) -1);
+						chessBlockEntity.doingAnimationTimer = 0;
+						chessBlockEntity.move = null;
+						chessBlockEntity.transition = null;
 						level.sendBlockUpdated(message.pos, level.getBlockState(chessPos), level.getBlockState(chessPos), 2);
+						// We start the placed Animation on server and client
+						NetworkUtil.setChessAnimationForAllTracking(level, chessPos, (byte) 0);
 			        }
 				}
 			});
